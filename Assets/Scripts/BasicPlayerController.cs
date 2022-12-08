@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 
 public class BasicPlayerController : MonoBehaviour
@@ -23,14 +22,14 @@ public class BasicPlayerController : MonoBehaviour
     public Animator animator;
 
     private Transform cameraMain;
-    private Vector3 currentMove;
+    private Vector3 currentMove = Vector3.zero;
 
     public GameObject stunEffect;
     
     private void Awake()
     {
         playerInput = new PlayerControls();
-        controller = GetComponent<CharacterController>();
+        
     }
 
     private void OnEnable()
@@ -42,16 +41,15 @@ public class BasicPlayerController : MonoBehaviour
         
     }
 
-    private void OnDisable()
-    {
-        playerInput.Disable();
-    }
-
-
     private void Start()
     {
         cameraMain = Camera.main.transform;
-        if (!receiveInput)
+        controller = GetComponent<CharacterController>();
+        if (receiveInput)
+        {
+            playerInput.Enable();
+        }
+        else
         {
             playerInput.Disable();
         }
@@ -73,13 +71,13 @@ public class BasicPlayerController : MonoBehaviour
             currentMove.y = 0;
         }
 
-        controller.Move(currentMove.normalized * Time.deltaTime * playerSpeed);
+        controller.Move(currentMove.normalized * (Time.deltaTime * playerSpeed));
         
         if (currentMove != Vector3.zero && groundedPlayer)
         {
             gameObject.transform.forward = currentMove;
         }
-
+        
         // Changes the height position of the player..
         if (playerInput.Player.Jump.triggered && groundedPlayer)
         {
@@ -94,7 +92,9 @@ public class BasicPlayerController : MonoBehaviour
             Attack();
         }
 
-        animator.SetFloat("Speed", Mathf.Abs(movementInput.x) + Mathf.Abs(movementInput.y));
+        var speed = Mathf.Abs(movementInput.x) + Mathf.Abs(movementInput.y);
+        
+        animator.SetFloat("Speed", speed);
     }
     
     public void Attack()
@@ -106,7 +106,6 @@ public class BasicPlayerController : MonoBehaviour
     {
         if (other.gameObject.transform.root != gameObject.transform.root)
         {
-            print("trigger" + other.gameObject);
             switch (other.tag)
             {
                 case "Crate": Stun(2.0f); break;

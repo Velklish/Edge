@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 
 public class Knockable : MonoBehaviour
@@ -11,10 +10,11 @@ public class Knockable : MonoBehaviour
     private CharacterController controller;
     private Vector3 moveDirection;
     private float knockBackCounter;
+    
     void Start()
     {
         controller = GetComponent<CharacterController>();
-        if (!controller)
+        if (controller == null)
         {
             controller = gameObject.AddComponent(typeof(CharacterController)) as CharacterController;
         }
@@ -23,26 +23,19 @@ public class Knockable : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (knockBackCounter <= 0)
-        {
-            moveDirection = Vector3.zero;
-        }
-        else
+        if (knockBackCounter >= 0)
         {
             knockBackCounter -= Time.deltaTime;
+            moveDirection.y += Physics.gravity.y * gravityScale * Time.deltaTime;
+            //transform.position += moveDirection * Time.deltaTime;
+            controller.Move(moveDirection * Time.deltaTime);
         }
-
-        moveDirection.y += Physics.gravity.y * gravityScale * Time.deltaTime;
-        //transform.position += moveDirection * Time.deltaTime;
-        controller.Move(moveDirection * Time.deltaTime);
     }
 
     private void OnTriggerEnter(Collider other)
     {
-        //print("Trigger" + other.gameObject);
         if (other.gameObject.transform.root != gameObject.transform.root)
         {
-            
             switch (other.tag)
             {
                 case "Bat": Knockback(other); break;
